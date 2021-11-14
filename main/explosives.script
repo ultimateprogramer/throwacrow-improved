@@ -1,19 +1,24 @@
 local TRIGGER_RESPONSE = hash("trigger_response")
 local DESTROYED = hash("destroyed")
 
+-- Initialization
 function init(self)
+	-- To track all nearby objects
 	self.nearby = {}
 end
 
+-- Message handling
 function on_message(self, message_id, message, sender)
 	if message_id == DESTROYED then
+		-- Impulse: All nearby objects need to feel the impulse
 		local pos = go.get_world_position()
 		for id,_ in pairs(self.nearby) do
 			local target_pos = go.get_world_position(id)
-			local force = vmath.normalize(target_pos - pos) * 10000000
+			local force = (target_pos - pos) * 60000
 			msg.post(id, "apply_force", { force = force, position = target_pos })
 		end
 	elseif message_id == TRIGGER_RESPONSE then
+		-- Enter and exit objects within a radius for impulse shockwave
 		if message.enter then
 			self.nearby[message.other_id] = true
 		else
